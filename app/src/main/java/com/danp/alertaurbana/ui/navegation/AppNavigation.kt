@@ -1,14 +1,27 @@
 package com.danp.alertaurbana.ui.navegation
 
+// Compose
 import androidx.compose.runtime.Composable
+import androidx.lifecycle.viewmodel.compose.viewModel
+
+// Navigation
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import androidx.navigation.navigation
-import com.danp.alertaurbana.ui.navegation.NavigationRoutes
 
+// Screens
+import com.danp.alertaurbana.ui.view.LoginScreen
+import com.danp.alertaurbana.ui.view.FeedScreen
+import com.danp.alertaurbana.ui.view.RegistroReporteScreen
+import com.danp.alertaurbana.ui.view.DetalleReporteScreen
+
+// ViewModels
+import com.danp.alertaurbana.ui.viewmodel.LoginViewModel
+import com.danp.alertaurbana.ui.viewmodel.FeedViewModel
+import com.danp.alertaurbana.ui.viewmodel.RegistroReporteViewModel
+import com.danp.alertaurbana.ui.viewmodel.DetalleReporteViewModel
 
 @Composable
 fun AppNavigation(navController: NavHostController) {
@@ -18,53 +31,38 @@ fun AppNavigation(navController: NavHostController) {
     ) {
         composable(NavigationRoutes.LOGIN) {
             LoginScreen(
-                onLoginSuccess = { navController.navigate(NavigationRoutes.LIST) }, // 👈
-                onRegisterClick = { navController.navigate(NavigationRoutes.REGISTER) }
+                viewModel = LoginViewModel(),
+                onLoginSuccess = { navController.navigate(NavigationRoutes.LIST) }
             )
         }
 
-        composable(NavigationRoutes.REGISTER) {
-            RegisterScreen(
-                onRegisterSuccess = { navController.navigate(NavigationRoutes.LOGIN) },
+
+        composable(NavigationRoutes.REPORT) {
+            RegistroReporteScreen(viewModel = RegistroReporteViewModel(),
                 onBack = { navController.popBackStack() }
             )
         }
-
         composable(NavigationRoutes.LIST) {
-            ReportListScreen(
-                onReportSelected = { id: Int ->
-                    navController.navigate(NavigationRoutes.detailWithId(id))
-                },
-                onUserClick = {
-                    navController.navigate(NavigationRoutes.USER)
-                },
-                onNewReportClick = {
-                    navController.navigate(NavigationRoutes.REPORT)
+            val viewModel: FeedViewModel = viewModel()
+            FeedScreen(
+                viewModel = viewModel,
+                onNavigateToDetail = { reportId ->
+                    navController.navigate("report_detail/$reportId")
                 }
             )
         }
 
-        composable(NavigationRoutes.REPORT) {
-            ReportScreen(onBack = { navController.popBackStack() })
-        }
-
         composable(
-            route = NavigationRoutes.DETAIL,
+            route = "report_detail/{reportId}",
             arguments = listOf(navArgument("reportId") { type = NavType.IntType })
-        ) {
-            val reportId = it.arguments?.getInt("reportId") ?: -1
-            ReportDetailScreen(reportId = reportId, onBack = { navController.popBackStack() })
+        ) { backStackEntry ->
+            val reportId = backStackEntry.arguments?.getInt("reportId") ?: -1
+            val viewModel: DetalleReporteViewModel = viewModel() // o hiltViewModel()
+            DetalleReporteScreen(reportId = reportId, viewModel = viewModel, onBack = { navController.popBackStack() })
         }
 
-        composable(NavigationRoutes.USER) {
-            UserScreen(
-                onLogout = {
-                    navController.navigate(NavigationRoutes.LOGIN) {
-                        popUpTo(NavigationRoutes.LIST) { inclusive = true }
-                    }
-                },
-                onBack = { navController.popBackStack() }
-            )
-        }
+
+
     }
 }
+

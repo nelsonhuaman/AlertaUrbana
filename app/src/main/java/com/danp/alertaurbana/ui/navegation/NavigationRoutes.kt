@@ -4,7 +4,7 @@ object NavigationRoutes {
     const val LOGIN = "login"
     const val REGISTER = "register"
     const val REPORT = "report"
-    const val LIST = "report_list"  // 👈 esta es ahora tu pantalla principal
+    const val LIST = "report_list"
     const val DETAIL = "report_detail/{reportId}"
     const val USER = "user"
 
